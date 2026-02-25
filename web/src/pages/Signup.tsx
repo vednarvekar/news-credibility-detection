@@ -6,6 +6,29 @@ import { Shield, Eye, EyeOff } from "lucide-react";
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
 
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirm) return alert("Passwords do not match");
+
+    const res = await fetch("http://localhost:5000/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password })
+    });
+
+    const data = await res.json();
+    if (!res.ok) return alert(data.error);
+
+    localStorage.setItem("token", data.token);
+    window.location.href = "/dashboard";
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center animated-bg px-6">
       <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-primary/5 blur-3xl animate-float" />
@@ -26,29 +49,37 @@ const Signup = () => {
         <h2 className="text-2xl font-bold text-foreground text-center mb-2">Create your account</h2>
         <p className="text-muted-foreground text-center text-sm mb-8">Start analyzing news credibility</p>
 
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">Full Name</label>
             <input
               type="text"
               placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             />
           </div>
+
           <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">Email</label>
             <input
               type="email"
               placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             />
           </div>
+
           <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all pr-12"
               />
               <button
@@ -60,19 +91,21 @@ const Signup = () => {
               </button>
             </div>
           </div>
+
           <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">Confirm Password</label>
             <input
               type="password"
               placeholder="••••••••"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             />
           </div>
-          <Link to="/dashboard">
-            <button type="submit" className="w-full gradient-button py-3.5 rounded-xl text-base mt-2">
-              Create Account
-            </button>
-          </Link>
+
+          <button type="submit" className="w-full gradient-button py-3.5 rounded-xl text-base mt-2">
+            Create Account
+          </button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground mt-6">

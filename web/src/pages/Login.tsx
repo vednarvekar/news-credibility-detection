@@ -6,6 +6,26 @@ import { Shield, Eye, EyeOff } from "lucide-react";
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const res = await fetch("http://localhost:5000/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) return alert(data.error);
+
+    localStorage.setItem("token", data.token);
+    window.location.href = "/dashboard";
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center animated-bg px-6">
       <div className="absolute top-1/3 left-1/3 w-80 h-80 rounded-full bg-primary/5 blur-3xl animate-float" />
@@ -26,21 +46,26 @@ const Login = () => {
         <h2 className="text-2xl font-bold text-foreground text-center mb-2">Welcome back</h2>
         <p className="text-muted-foreground text-center text-sm mb-8">Sign in to your account</p>
 
-        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">Email</label>
             <input
               type="email"
               placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             />
           </div>
+
           <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all pr-12"
               />
               <button
@@ -52,15 +77,15 @@ const Login = () => {
               </button>
             </div>
           </div>
+
           <div className="flex items-center gap-2">
             <input type="checkbox" id="remember" className="rounded border-border accent-primary" />
             <label htmlFor="remember" className="text-sm text-muted-foreground">Remember me</label>
           </div>
-          <Link to="/dashboard">
-            <button type="submit" className="w-full gradient-button py-3.5 rounded-xl text-base mt-2">
-              Sign In
-            </button>
-          </Link>
+
+          <button type="submit" className="w-full gradient-button py-3.5 rounded-xl text-base mt-2">
+            Sign In
+          </button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground mt-6">

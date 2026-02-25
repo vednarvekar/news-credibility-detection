@@ -1,18 +1,22 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express, { type Request,type Response } from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import scrapeArticle from "./scraper.js";
 import analyzeWithLLM from "./llm.js";
 import { LLMResult } from "./types.js";
 import { checkDomain } from "./domainCheck.js";
+import { register, login, authMiddleware } from "./auth.js";
 
-dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post("/analyze", async (req: Request, res: Response) => {
+app.post("/auth/register", register);
+app.post("/auth/login", login);
+
+app.post("/analyze", authMiddleware, async (req: Request, res: Response) => {
   try {
     const { url } = req.body as { url: string };
 

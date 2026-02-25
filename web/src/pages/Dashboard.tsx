@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -15,6 +15,12 @@ const Dashboard = () => {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
 
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      window.location.href = "/login";
+    }
+  }, []);
+
   const handleAnalyze = async () => {
     const trimmed = url.trim();
     if (!trimmed) return;
@@ -23,9 +29,14 @@ const Dashboard = () => {
     setResult(null);
 
     try {
+      const token = localStorage.getItem("token");
+
       const res = await fetch(`${API_BASE}/analyze`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ url: trimmed }),
       });
 
