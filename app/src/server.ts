@@ -3,10 +3,11 @@ dotenv.config();
 import express, { type Request,type Response } from "express";
 import cors from "cors";
 import scrapeArticle from "./scraper.js";
-import analyzeWithLLM from "./llm.js";
+import analyzeWithLLM, { LLMError } from "./llm.js";
 import { LLMResult } from "./types.js";
 import { checkDomain } from "./domainCheck.js";
 import { register, login, authMiddleware } from "./auth.js";
+import { ScrapeError } from "./scraper.js";
 
 
 const app = express();
@@ -24,13 +25,20 @@ app.post("/analyze", authMiddleware, async (req: Request, res: Response) => {
       return res.status(400).json({ error: "URL is required" });
     }
 
-    const article = await scrapeArticle(url);
+    try {
+      new URL(url);
+    } catch {
+      return res.status(400).json({ error: "Invalid URL" });
+    }
 
-    const domainSignal = checkDomain(url);
+    const scraped = await scrapeArticle(url);
+
+    const domainSignal = checkDomain(scraped.resolvedUrl);
 
     const result: LLMResult = await analyzeWithLLM(
-      article,
-      domainSignal
+      scraped.article,
+      domainSignal,
+      scraped.extractionQuality
     );
 
     res.json({
@@ -40,6 +48,19 @@ app.post("/analyze", authMiddleware, async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error(error);
+
+    if (error instanceof ScrapeError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    if (error instanceof LLMError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+
     res.status(500).json({ error: "Analysis failed" });
   }
 });

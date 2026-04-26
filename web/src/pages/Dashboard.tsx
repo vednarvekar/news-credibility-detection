@@ -40,9 +40,17 @@ const Dashboard = () => {
         body: JSON.stringify({ url: trimmed }),
       });
 
-      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.error || `Server returned ${res.status}`);
+      }
 
       const data: AnalysisResult = await res.json();
+
+      if (typeof data.summary !== "string" || !data.summary.trim()) {
+        throw new Error("The analysis response did not include an AI summary");
+      }
+
       setResult(data);
       setState("results");
     } catch (err: any) {

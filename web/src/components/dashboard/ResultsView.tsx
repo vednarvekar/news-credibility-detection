@@ -67,7 +67,7 @@ const ResultsView = ({ data }: { data: AnalysisResult }) => {
         </div>
       </motion.div>
 
-      <motion.div variants={item} className="glass-card p-6">
+      {/* <motion.div variants={item} className="glass-card p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <AlertTriangle className="w-5 h-5 text-primary" />
@@ -75,7 +75,7 @@ const ResultsView = ({ data }: { data: AnalysisResult }) => {
           <h3 className="text-lg font-semibold text-foreground">AI Summary</h3>
         </div>
         <p className="text-muted-foreground leading-relaxed text-sm">{data.summary}</p>
-      </motion.div>
+      </motion.div> */}
     </motion.div>
   );
 };
